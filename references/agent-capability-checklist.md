@@ -85,6 +85,7 @@ CLI 专属能力(终端 TUI、主题、键位、tmux 集成)自研 Web 形态可
 - **bash 工程细节**:timeout 单位秒;`shellCommandPrefix` 支持用户 shell aliases;Windows 缺 taskkill 兜底;执行时长格式化(分/时)。
 - **结构化输出约束**:`constrainedSampling`(json_schema strict prefer/require + openai_lark/openai_regex)。
 - **文件变更队列**:写类工具经 `withFileMutationQueue` 串行化。
+- **bash 会话环境注入**:bash/powershell 子进程自动携带 `PI_SESSION_ID` / `PI_PROVIDER` / `PI_MODEL` / `PI_REASONING_LEVEL` 环境变量(`exposeSessionEnvironment: false` 可关;spawnHook 可改写 `ctx.env`)——自定义命令工具可让子进程感知会话状态,也是排查"子进程多了 PI_* 变量"的钥匙(docs/environment-variables.md)。
 
 ## 4. 事件系统
 
@@ -228,6 +229,21 @@ CLI 专属能力(终端 TUI、主题、键位、tmux 集成)自研 Web 形态可
 - **运行**:`npm run eval -- --provider X --model Y`(PI_PROVIDER/PI_MODEL 等价);参数透传 Vitest;认证走 ModelRuntime 全套。
 
 ---
+
+## 13. 产品化最后一公里(pi 也不覆盖,防"半成品"错觉)
+
+pi 本身是单用户 CLI 产品。12 个模块做完 = **pi 级引擎**,离"生产可用的完整作品"还差一圈**业务外壳**——这些不在 pi 里、也不在本 skill 里,按业务自建:
+
+| 缺口 | 说明 | skill 给到的边界 |
+|---|---|---|
+| 数据库 schema | 会话/消息落 MySQL/PG 的表设计 | 只教到 inMemory + 自管存储的接口(F01) |
+| 终端用户体系 | 认证、多租户隔离、配额 | 只给"每用户独立 session"原则 |
+| Web 前端 | 聊天/进度/审批 UI | 只给 SSE 协议层(E11) |
+| 部署运维 | 容器化、扩缩容、监控告警接入 | 无 |
+| 成本执行 | usage 统计有了,但预算拦截/限流要自己做 | 统计见第 11 节 |
+| 合规 | 内容安全、审计留存 | 按行业自建 |
+
+**替代路径**:不想自建外壳,直接用 pi 本体(RPC/子进程)当引擎,业务侧只做薄客户端。
 
 ## 验收方法:怎么证明你做到了 L3
 

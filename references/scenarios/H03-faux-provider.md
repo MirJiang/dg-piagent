@@ -38,6 +38,20 @@
 
 > ⚠️ **不要用 `createAgentSessionServices`**：该工厂（`agent-session-services`）强制内部 `DefaultResourceLoader`，且其内部 ModelRuntime 没配 faux provider，会让 faux 调用失败。本场景必须用 `createAgentSession` 并显式传 `modelRuntime`（见最大陷阱节）。
 
+## ⚠️ 前置陷阱：npm 双 pi-ai 实例(报 `No API provider registered for api: faux:...` 的真凶)
+
+若项目把 `@earendil-works/pi-ai` 同时作为直接依赖,npm 会在 `pi-coding-agent/node_modules/` 下再放一份**私有嵌套副本**(两份版本完全相同也会嵌套,实测 `overrides` 也压不掉)。`registerFauxProvider` 注册进的是**你 import 的那份 pi-ai** 的全局 api 注册表,而 `createAgentSession` 内部用的是**嵌套那份**——注册表不互通,prompt 直接报 `No API provider registered for api: faux:<随机id>`(ModelsError,且会被 auto-retry 静默消耗后续预设响应,症状隐蔽)。
+
+**自检**:`ls node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/` 存在即双实例。
+**修法**(实测有效):测试代码改从嵌套副本按文件路径导入,保证与 agent 同一模块实例:
+
+```ts
+import { registerFauxProvider } from "./node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-ai/dist/compat.js";
+import { fauxAssistantMessage, fauxToolCall, fauxText } from "./node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-ai/dist/providers/faux.js";
+```
+
+(2026-09-19 在真实 0.85.1 安装上验证:改此导入后工具调用/拦截/事件链全部跑通,见 examples/faux-e2e.ts。)
+
 ## ⚠️ 最大陷阱：光传 `model: faux.getModel()` 不够，ModelRuntime 也要配
 
 **事实**：`createAgentSession` 创建的 Agent 在调 LLM 时走 `streamFn`，而 streamFn 第一步就是向 `modelRuntime` 请求认证：

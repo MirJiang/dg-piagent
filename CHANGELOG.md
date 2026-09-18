@@ -2,6 +2,17 @@
 
 本文件记录 dg-piagent skill 的全部修订历史（永久保留，只增不删）。维护规则见 [skill-maintenance.md](references/skill-maintenance.md)。
 
+## [2026-09-19] 终审:端到端实测 + 2 处补遗 + 教程修复
+
+**端到端实测(0.85.1 真机,无 API key)**:按 skill 教法组装迷你垂直 agent(Faux Provider + A03 提示词覆盖 + D01 自定义工具 + E01 tool_call 拦截 + F01 inMemory + subscribe 观察者),8/8 断言通过——工具真实执行、危险工具被扩展拦截、拦截 reason 回喂后模型自纠、agent_settled 每 prompt 恰好一次、事件链完整。测试脚本存于 skill 仓库 examples/faux-e2e.ts。
+
+**实测发现并修复**:
+- H03 新增「npm 双 pi-ai 实例陷阱」:pi-ai 同时为直接依赖时 npm 必嵌套私有副本,registerFauxProvider 注册进错误的全局注册表,报 No API provider registered for api: faux:…,且 auto-retry 会静默吞掉预设响应;修法=按文件路径从嵌套副本导入(实测有效);
+- 清单第 3 节补 bash 会话环境注入(PI_SESSION_ID 等);
+- 清单新增第 13 节「产品化最后一公里」:诚实划界 12 模块=pi 级引擎,DB schema/用户体系/前端/部署/成本执行/合规为业务外壳,skill 不覆盖。
+
+**教程代码修复(strict 零错误)**:06a 类型收窄、query-data 补 details×2 与 label。
+
 ## [2026-09-19] 清单 v3:回归纯 pi 基准 + 全功能面补遗
 
 应用户要求清除全部外部来源内容(🌍 业界条目、交叉验证、时效审计、外部评估/长期记忆节),清单重写为**纯 pi v0.85.1 基准**。同时反向盘点 pi 全部包/文档,补入此前遗漏的 pi 功能:
