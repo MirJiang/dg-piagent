@@ -85,7 +85,7 @@ CLI 专属能力(终端 TUI、主题、键位、tmux 集成)自研 Web 形态可
 - **bash 工程细节**:timeout 单位秒;`shellCommandPrefix` 支持用户 shell aliases;Windows 缺 taskkill 兜底;执行时长格式化(分/时)。
 - **结构化输出约束**:`constrainedSampling`(json_schema strict prefer/require + openai_lark/openai_regex)。
 - **文件变更队列**:写类工具经 `withFileMutationQueue` 串行化。
-- **bash 会话环境注入**:bash/powershell 子进程自动携带 `PI_SESSION_ID` / `PI_PROVIDER` / `PI_MODEL` / `PI_REASONING_LEVEL` 环境变量(`exposeSessionEnvironment: false` 可关;spawnHook 可改写 `ctx.env`)——自定义命令工具可让子进程感知会话状态,也是排查"子进程多了 PI_* 变量"的钥匙(docs/environment-variables.md)。
+- **bash 会话环境注入**:bash/powershell 子进程自动携带 `PI_SESSION_ID` / `PI_SESSION_FILE` / `PI_PROVIDER` / `PI_MODEL` / `PI_REASONING_LEVEL` 环境变量(`exposeSessionEnvironment: false` 可关;spawnHook 可改写 `ctx.env`)——自定义命令工具可让子进程感知会话状态,也是排查"子进程多了 PI_* 变量"的钥匙(docs/environment-variables.md)。
 
 ## 4. 事件系统
 

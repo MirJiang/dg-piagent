@@ -50,7 +50,7 @@ import { registerFauxProvider } from "./node_modules/@earendil-works/pi-coding-a
 import { fauxAssistantMessage, fauxToolCall, fauxText } from "./node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-ai/dist/providers/faux.js";
 ```
 
-(2026-09-19 在真实 0.85.1 安装上验证:改此导入后工具调用/拦截/事件链全部跑通,见 examples/faux-e2e.ts。)
+(2026-09-19 双重验证:①干净项目仅装 pi-coding-agent@0.85.1 + pi-ai@0.85.1 即复现双实例(npm 对两份同版本不去重,包 tarball 本身不含 node_modules);②对照实验:H03 原文的 `@earendil-works/pi-ai/compat` 导入 3/8 断言挂(auto_retry 静默吞响应),改嵌套路径导入后 8/8,复跑 3 次稳定。见 examples/faux-e2e.ts。)
 
 ## ⚠️ 最大陷阱：光传 `model: faux.getModel()` 不够，ModelRuntime 也要配
 
